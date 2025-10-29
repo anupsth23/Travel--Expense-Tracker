@@ -83,46 +83,59 @@ export default function ExpensesList() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+    <div className="min-h-screen pb-20">
+      <header className="glass sticky top-0 z-10 backdrop-blur-md">
+        <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">Expenses</h1>
+            <div>
+              <h1 className="text-3xl font-bold gradient-text">All Expenses</h1>
+              <p className="text-gray-600 mt-1">Your complete expense history</p>
+            </div>
             <Link
               href="/"
-              className="text-primary-600 hover:text-primary-700 font-medium"
+              className="btn-secondary flex items-center gap-2"
             >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z" />
+              </svg>
               Dashboard
             </Link>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      <main className="max-w-6xl mx-auto px-6 py-8">
         {sortedExpenses.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg mb-4">No expenses yet</p>
-            <Link
-              href="/"
-              className="inline-block bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition"
-            >
-              Add Your First Expense
+          <div className="text-center py-16">
+            <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-white mb-2">No expenses yet</h3>
+            <p className="text-gray-300 mb-6">Start tracking your travel expenses to see them here</p>
+            <Link href="/add" className="btn-primary inline-flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add First Expense
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid gap-6">
             {sortedExpenses.map((expense) => (
               <div
                 key={expense.id}
-                className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition"
+                className="card p-6 card-hover"
               >
-                <div className="flex gap-4">
+                <div className="flex gap-6">
                   {/* Receipt Image */}
                   <div className="flex-shrink-0">
                     <img
                       src={expense.receiptImage}
                       alt="Receipt"
-                      className="w-20 h-20 object-cover rounded border border-gray-200 cursor-pointer hover:opacity-80 transition"
+                      className="w-24 h-24 object-cover rounded-xl border-2 border-gray-200 cursor-pointer hover:opacity-80 transition-all duration-300 hover:scale-105"
                       onClick={() => handleReceiptClick(expense.receiptImage, expense.merchant)}
                     />
                   </div>
@@ -131,17 +144,17 @@ export default function ExpensesList() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-gray-900 truncate">
+                        <h3 className="text-xl font-bold text-gray-900 truncate mb-2">
                           {expense.merchant}
                         </h3>
-                        <p className="text-sm text-gray-500 mt-1">
-                          {format(new Date(expense.date), 'MMM dd, yyyy')}
+                        <p className="text-gray-500 mb-3">
+                          {format(new Date(expense.date), 'EEEE, MMM dd, yyyy')}
                         </p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="inline-block px-2 py-1 bg-primary-100 text-primary-700 text-xs font-medium rounded">
+                        <div className="flex items-center gap-3">
+                          <span className="inline-block px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 text-sm font-semibold rounded-full">
                             {expense.category}
                           </span>
-                          <span className="text-lg font-bold text-gray-900">
+                          <span className="text-2xl font-bold text-gray-900">
                             ${expense.amount.toFixed(2)}
                           </span>
                         </div>
@@ -150,11 +163,11 @@ export default function ExpensesList() {
                       {/* Delete Button */}
                       <button
                         onClick={() => handleDelete(expense.id)}
-                        className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded transition"
+                        className="text-red-500 hover:text-red-700 p-3 hover:bg-red-50 rounded-xl transition-all duration-200 hover:scale-110"
                         aria-label="Delete expense"
                       >
                         <svg
-                          className="w-5 h-5"
+                          className="w-6 h-6"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"

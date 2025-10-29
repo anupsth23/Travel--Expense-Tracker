@@ -84,35 +84,65 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+    <div className="min-h-screen pb-20">
+      <header className="glass sticky top-0 z-10 backdrop-blur-md">
+        <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">Travel Expenses</h1>
+            <div>
+              <h1 className="text-3xl font-bold gradient-text">Travel Expenses</h1>
+              <p className="text-gray-600 mt-1">Track your spending with smart insights</p>
+            </div>
             <Link
               href="/expenses"
-              className="text-primary-600 hover:text-primary-700 font-medium"
+              className="btn-secondary flex items-center gap-2"
             >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
               View All
             </Link>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Total Spend Card */}
-        <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg shadow-lg p-6 mb-6 text-white">
-          <p className="text-primary-100 text-sm mb-1">Total Spent</p>
-          <p className="text-4xl font-bold">${totalSpend.toFixed(2)}</p>
+        <div className="card mb-8 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-8 text-white relative">
+            <div className="absolute inset-0 bg-black opacity-10"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100 text-lg mb-2">Total Spent</p>
+                  <p className="text-5xl font-bold mb-2">${totalSpend.toFixed(2)}</p>
+                  <p className="text-blue-100 text-sm">
+                    {expenses.length} {expenses.length === 1 ? 'expense' : 'expenses'} recorded
+                  </p>
+                </div>
+                <div className="text-right">
+                  <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Category Pie Chart */}
         <section className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Expenses by Category</h2>
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-white">Expenses by Category</h2>
+            <div className="text-white text-sm">
+              Click categories to highlight
+            </div>
+          </div>
+          <div className="card p-8">
             {pieData.length > 0 ? (
-              <div className="flex flex-col lg:flex-row items-center gap-8">
-                <div className="w-full lg:w-1/2 h-80">
+              <div className="flex flex-col lg:flex-row items-center gap-12">
+                <div className="w-full lg:w-1/2 h-96">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -121,7 +151,7 @@ export default function Dashboard() {
                         cy="50%"
                         labelLine={false}
                         label={(props: any) => `${props.name} ${(props.percent * 100).toFixed(0)}%`}
-                        outerRadius={80}
+                        outerRadius={120}
                         fill="#8884d8"
                         dataKey="value"
                         onClick={handlePieClick}
@@ -131,39 +161,46 @@ export default function Dashboard() {
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']} />
-                      <Legend />
+                      <Tooltip 
+                        formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']}
+                        contentStyle={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          border: 'none',
+                          borderRadius: '12px',
+                          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
+                        }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
                 <div className="w-full lg:w-1/2">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Category Breakdown</h3>
-                  <div className="space-y-3">
+                  <h3 className="text-xl font-bold text-gray-900 mb-6">Category Breakdown</h3>
+                  <div className="space-y-4">
                     {pieData.map((item) => {
                       const percentage = totalSpend > 0 ? (item.value / totalSpend) * 100 : 0;
                       return (
                         <div
                           key={item.name}
-                          className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
+                          className={`flex items-center justify-between p-4 rounded-xl cursor-pointer transition-all duration-300 ${
                             selectedCategory === item.name 
-                              ? 'bg-gray-100 ring-2 ring-primary-500' 
-                              : 'bg-gray-50 hover:bg-gray-100'
+                              ? 'bg-gradient-to-r from-blue-50 to-purple-50 ring-2 ring-blue-500 shadow-lg' 
+                              : 'bg-gray-50 hover:bg-gray-100 hover:shadow-md'
                           }`}
                           onClick={() => setSelectedCategory(selectedCategory === item.name ? null : item.name)}
                         >
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-4">
                             <div
-                              className="w-4 h-4 rounded-full"
+                              className="w-5 h-5 rounded-full shadow-sm"
                               style={{ backgroundColor: item.color }}
                             />
-                            <span className="font-medium text-gray-900">{item.name}</span>
+                            <span className="font-semibold text-gray-900 text-lg">{item.name}</span>
                           </div>
                           <div className="text-right">
-                            <p className="text-lg font-bold text-gray-900">
+                            <p className="text-xl font-bold text-gray-900">
                               ${item.value.toFixed(2)}
                             </p>
-                            <p className="text-sm text-gray-500">
-                              {percentage.toFixed(1)}%
+                            <p className="text-sm text-gray-600 font-medium">
+                              {percentage.toFixed(1)}% of total
                             </p>
                           </div>
                         </div>
@@ -173,9 +210,20 @@ export default function Dashboard() {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">No expenses to display</p>
-                <p className="text-gray-400 text-sm mt-2">Add your first expense to see the breakdown</p>
+              <div className="text-center py-16">
+                <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No expenses yet</h3>
+                <p className="text-gray-500 mb-6">Start tracking your travel expenses to see beautiful insights</p>
+                <Link href="/add" className="btn-primary inline-flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add First Expense
+                </Link>
               </div>
             )}
           </div>
@@ -183,29 +231,45 @@ export default function Dashboard() {
 
         {/* Daily Summary */}
         <section>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Days</h2>
+          <h2 className="text-2xl font-bold text-white mb-6">Recent Activity</h2>
           {dailySummaries.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-              <p className="text-gray-500">No expenses recorded yet</p>
+            <div className="card p-8 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <p className="text-gray-500 text-lg">No recent activity</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="grid gap-4">
               {dailySummaries.map((summary) => (
                 <div
                   key={summary.date}
-                  className="bg-white rounded-lg shadow-sm p-4 flex items-center justify-between hover:shadow-md transition"
+                  className="card p-6 card-hover"
                 >
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {format(parseISO(summary.date), 'EEEE, MMM dd, yyyy')}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {summary.count} {summary.count === 1 ? 'expense' : 'expenses'}
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900 text-lg">
+                          {format(parseISO(summary.date), 'EEEE, MMM dd, yyyy')}
+                        </p>
+                        <p className="text-gray-500">
+                          {summary.count} {summary.count === 1 ? 'expense' : 'expenses'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-gray-900">
+                        ${summary.total.toFixed(2)}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xl font-bold text-gray-900">
-                    ${summary.total.toFixed(2)}
-                  </p>
                 </div>
               ))}
             </div>
@@ -216,11 +280,11 @@ export default function Dashboard() {
       {/* Floating Add Button */}
       <Link
         href="/add"
-        className="fixed bottom-6 right-6 w-14 h-14 bg-primary-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-primary-700 transition hover:scale-110"
+        className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:shadow-3xl transition-all duration-300 hover:scale-110 group"
         aria-label="Add expense"
       >
         <svg
-          className="w-6 h-6"
+          className="w-7 h-7 group-hover:rotate-90 transition-transform duration-300"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
