@@ -11,7 +11,12 @@ const nextConfig = {
     }
     return config;
   },
+  // For GitHub Pages deployment
+  output: 'export',
+  trailingSlash: true,
+  images: {
+    unoptimized: true
+  }
 }
 
 module.exports = nextConfig
-
