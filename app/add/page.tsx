@@ -18,6 +18,7 @@ export default function AddExpense() {
   });
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [skipOCR, setSkipOCR] = useState(false);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -29,25 +30,73 @@ export default function AddExpense() {
     try {
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        throw new Error('Please upload an image file');
+        throw new Error('Please upload an image file (PNG, JPG, etc.)');
+      }
+
+      // Check file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error('File size too large. Please upload an image smaller than 10MB.');
       }
 
       // Convert to data URL
       const dataURL = await fileToDataURL(file);
       setReceiptImage(dataURL);
 
-      // Process receipt with OCR
-      const extracted = await processReceipt(dataURL);
-      
-      setFormData({
-        amount: extracted.amount || undefined,
-        merchant: extracted.merchant,
-        date: extracted.date,
-        category: formData.category || 'Miscellaneous',
-      });
+      // Process receipt with OCR (with timeout) - only if not skipping
+      if (!skipOCR) {
+        try {
+          const ocrPromise = processReceipt(dataURL);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('OCR processing timeout')), 30000)
+          );
+
+          const extracted = await Promise.race([ocrPromise, timeoutPromise]) as any;
+          
+          setFormData({
+            amount: extracted.amount || undefined,
+            merchant: extracted.merchant || 'Receipt Uploaded',
+            date: extracted.date,
+            category: formData.category || 'Miscellaneous',
+          });
+
+          // Show success message if OCR worked
+          if (extracted.amount) {
+            console.log('Receipt processed successfully!');
+          } else {
+            console.log('Receipt uploaded, but OCR could not extract details. Please fill in manually.');
+          }
+        } catch (ocrError) {
+          console.log('OCR failed, continuing with manual entry');
+          setFormData({
+            amount: undefined,
+            merchant: 'Receipt Uploaded',
+            date: new Date().toISOString().split('T')[0],
+            category: formData.category || 'Miscellaneous',
+          });
+        }
+      } else {
+        // Skip OCR, just set basic info
+        setFormData({
+          amount: undefined,
+          merchant: 'Receipt Uploaded',
+          date: new Date().toISOString().split('T')[0],
+          category: formData.category || 'Miscellaneous',
+        });
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to process receipt');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to process receipt';
+      setError(errorMessage);
       console.error('Error processing receipt:', err);
+      
+      // Still allow the user to continue even if OCR fails
+      if (receiptImage) {
+        setFormData({
+          amount: undefined,
+          merchant: 'Receipt Uploaded',
+          date: new Date().toISOString().split('T')[0],
+          category: formData.category || 'Miscellaneous',
+        });
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -124,9 +173,20 @@ export default function AddExpense() {
         <form onSubmit={handleSubmit} className="card p-8 space-y-8">
           {/* Receipt Upload */}
           <div>
-            <label className="block text-lg font-semibold text-gray-900 mb-4">
-              📸 Receipt Image *
-            </label>
+            <div className="flex items-center justify-between mb-4">
+              <label className="block text-lg font-semibold text-gray-900">
+                📸 Receipt Image *
+              </label>
+              <label className="flex items-center gap-2 text-sm text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={skipOCR}
+                  onChange={(e) => setSkipOCR(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                Skip AI processing
+              </label>
+            </div>
             {receiptImage ? (
               <div className="relative group">
                 <img
@@ -286,11 +346,19 @@ export default function AddExpense() {
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border-2 border-red-200 text-red-700 px-6 py-4 rounded-xl flex items-center gap-3">
-              <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="font-medium">{error}</span>
+            <div className="bg-yellow-50 border-2 border-yellow-200 text-yellow-800 px-6 py-4 rounded-xl">
+              <div className="flex items-start gap-3">
+                <svg className="w-6 h-6 text-yellow-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <div>
+                  <p className="font-medium">OCR Processing Issue</p>
+                  <p className="text-sm mt-1">{error}</p>
+                  <p className="text-sm mt-2 text-yellow-700">
+                    Don't worry! You can still add your expense manually below.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 

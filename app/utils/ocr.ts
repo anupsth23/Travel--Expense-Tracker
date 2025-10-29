@@ -5,10 +5,16 @@ import { ExpenseCategory } from '../types';
  * Extract text from receipt image using OCR
  */
 export async function extractReceiptText(imageDataUrl: string): Promise<string> {
-  const worker = await createWorker('eng');
-  const { data: { text } } = await worker.recognize(imageDataUrl);
-  await worker.terminate();
-  return text;
+  try {
+    const worker = await createWorker('eng');
+    const { data: { text } } = await worker.recognize(imageDataUrl);
+    await worker.terminate();
+    return text;
+  } catch (error) {
+    console.error('OCR Error:', error);
+    // Return empty string if OCR fails
+    return '';
+  }
 }
 
 /**
@@ -130,10 +136,10 @@ export async function processReceipt(imageDataUrl: string): Promise<{
     };
   } catch (error) {
     console.error('Error processing receipt:', error);
-    // Return default values on error
+    // Return default values on error - don't fail the entire upload
     return {
       amount: null,
-      merchant: '',
+      merchant: 'Receipt Uploaded',
       date: new Date().toISOString().split('T')[0],
     };
   }
