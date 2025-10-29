@@ -84,12 +84,12 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen pb-20">
-      <header className="glass sticky top-0 z-10 backdrop-blur-md">
+    <div className="min-h-screen bg-gray-50">
+      <header className="glass sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold gradient-text">Travel Expenses</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Travel Expenses</h1>
               <p className="text-gray-600 mt-1">Track your spending with smart insights</p>
             </div>
             <Link
@@ -134,8 +134,8 @@ export default function Dashboard() {
         {/* Category Pie Chart */}
         <section className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white">Expenses by Category</h2>
-            <div className="text-white text-sm">
+            <h2 className="text-2xl font-bold text-gray-900">Expenses by Category</h2>
+            <div className="text-gray-600 text-sm">
               Click categories to highlight
             </div>
           </div>
@@ -231,7 +231,7 @@ export default function Dashboard() {
 
         {/* Daily Summary */}
         <section>
-          <h2 className="text-2xl font-bold text-white mb-6">Recent Activity</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Recent Activity</h2>
           {dailySummaries.length === 0 ? (
             <div className="card p-8 text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -280,11 +280,11 @@ export default function Dashboard() {
       {/* Floating Add Button */}
       <Link
         href="/add"
-        className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl shadow-2xl flex items-center justify-center hover:shadow-3xl transition-all duration-300 hover:scale-110 group"
+        className="fixed bottom-8 right-8 w-16 h-16 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 hover:shadow-xl transition-all duration-200 hover:scale-105"
         aria-label="Add expense"
       >
         <svg
-          className="w-7 h-7 group-hover:rotate-90 transition-transform duration-300"
+          className="w-7 h-7"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

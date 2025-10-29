@@ -100,20 +100,20 @@ export default function AddExpense() {
   };
 
   return (
-    <div className="min-h-screen">
-      <header className="glass sticky top-0 z-10 backdrop-blur-md">
+    <div className="min-h-screen bg-gray-50">
+      <header className="glass sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-6 py-6">
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className="p-2 hover:bg-white hover:bg-opacity-20 rounded-xl transition-all duration-200"
+              className="p-2 hover:bg-gray-100 rounded-xl transition-all duration-200"
             >
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold gradient-text">Add Expense</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Add Expense</h1>
               <p className="text-gray-600 mt-1">Upload receipt and let AI extract the details</p>
             </div>
           </div>
