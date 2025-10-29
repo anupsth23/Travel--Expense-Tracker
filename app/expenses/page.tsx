@@ -6,8 +6,44 @@ import { Expense, ExpenseCategory, EXPENSE_CATEGORIES } from '../types';
 import { getExpenses, deleteExpense } from '../utils/storage';
 import { format } from 'date-fns';
 
+// Receipt Image Modal Component
+function ReceiptModal({ isOpen, onClose, imageSrc, merchant }: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  imageSrc: string; 
+  merchant: string; 
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-4xl max-h-full overflow-hidden">
+        <div className="flex items-center justify-between p-4 border-b">
+          <h3 className="text-lg font-semibold text-gray-900">{merchant} - Receipt</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div className="p-4">
+          <img
+            src={imageSrc}
+            alt="Receipt"
+            className="max-w-full max-h-96 object-contain mx-auto"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ExpensesList() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [selectedReceipt, setSelectedReceipt] = useState<{ image: string; merchant: string } | null>(null);
 
   useEffect(() => {
     // Load expenses from storage
@@ -35,6 +71,10 @@ export default function ExpensesList() {
       deleteExpense(id);
       setExpenses(getExpenses());
     }
+  };
+
+  const handleReceiptClick = (image: string, merchant: string) => {
+    setSelectedReceipt({ image, merchant });
   };
 
   // Sort expenses by date (most recent first)
@@ -82,7 +122,8 @@ export default function ExpensesList() {
                     <img
                       src={expense.receiptImage}
                       alt="Receipt"
-                      className="w-20 h-20 object-cover rounded border border-gray-200"
+                      className="w-20 h-20 object-cover rounded border border-gray-200 cursor-pointer hover:opacity-80 transition"
+                      onClick={() => handleReceiptClick(expense.receiptImage, expense.merchant)}
                     />
                   </div>
 
@@ -134,6 +175,14 @@ export default function ExpensesList() {
           </div>
         )}
       </main>
+
+      {/* Receipt Modal */}
+      <ReceiptModal
+        isOpen={!!selectedReceipt}
+        onClose={() => setSelectedReceipt(null)}
+        imageSrc={selectedReceipt?.image || ''}
+        merchant={selectedReceipt?.merchant || ''}
+      />
     </div>
   );
 }

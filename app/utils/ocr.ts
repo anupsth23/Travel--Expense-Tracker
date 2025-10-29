@@ -58,9 +58,19 @@ export function parseReceiptText(text: string): {
     amount = Math.max(...numbers);
   }
   
-  // Merchant name is usually in the first few lines
-  if (lines.length > 0) {
-    merchant = lines[0].substring(0, 50); // Limit to 50 chars
+  // Merchant name is usually in the first few lines, look for business names
+  for (let i = 0; i < Math.min(3, lines.length); i++) {
+    const line = lines[i].trim();
+    // Skip lines that look like dates, amounts, or common receipt headers
+    if (!line.match(/^\d+[\/\-]\d+[\/\-]\d+/) && 
+        !line.match(/^\$?\d+[.,]\d{2}$/) &&
+        !line.toLowerCase().includes('total') &&
+        !line.toLowerCase().includes('subtotal') &&
+        !line.toLowerCase().includes('tax') &&
+        line.length > 3) {
+      merchant = line.substring(0, 50); // Limit to 50 chars
+      break;
+    }
   }
   
   // Try to find date (common formats)
