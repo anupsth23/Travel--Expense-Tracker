@@ -1,0 +1,167 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Expense, ExpenseCategory, EXPENSE_CATEGORIES } from './types';
+import { getExpenses } from './utils/storage';
+import { format, parseISO } from 'date-fns';
+
+export default function Dashboard() {
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  useEffect(() => {
+    setExpenses(getExpenses());
+    
+    const handleStorageChange = () => {
+      setExpenses(getExpenses());
+    };
+    window.addEventListener('storage', handleStorageChange);
+    
+    const interval = setInterval(() => {
+      setExpenses(getExpenses());
+    }, 1000);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Calculate totals by category
+  const categoryTotals = EXPENSE_CATEGORIES.reduce((acc, category) => {
+    acc[category] = expenses
+      .filter(exp => exp.category === category)
+      .reduce((sum, exp) => sum + exp.amount, 0);
+    return acc;
+  }, {} as Record<ExpenseCategory, number>);
+
+  const totalSpend = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+
+  // Group expenses by date
+  const expensesByDate = expenses.reduce((acc, exp) => {
+    const date = exp.date;
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(exp);
+    return acc;
+  }, {} as Record<string, Expense[]>);
+
+  const dailySummaries = Object.entries(expensesByDate)
+    .map(([date, exps]) => ({
+      date,
+      total: exps.reduce((sum, exp) => sum + exp.amount, 0),
+      count: exps.length,
+    }))
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 7); // Show last 7 days
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <header className="bg-white shadow-sm sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-gray-900">Travel Expenses</h1>
+            <Link
+              href="/expenses"
+              className="text-primary-600 hover:text-primary-700 font-medium"
+            >
+              View All
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 py-6">
+        {/* Total Spend Card */}
+        <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg shadow-lg p-6 mb-6 text-white">
+          <p className="text-primary-100 text-sm mb-1">Total Spent</p>
+          <p className="text-4xl font-bold">${totalSpend.toFixed(2)}</p>
+        </div>
+
+        {/* Category Totals */}
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">By Category</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {EXPENSE_CATEGORIES.map((category) => {
+              const total = categoryTotals[category];
+              const percentage = totalSpend > 0 ? (total / totalSpend) * 100 : 0;
+              
+              return (
+                <div
+                  key={category}
+                  className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition"
+                >
+                  <p className="text-sm text-gray-600 mb-1">{category}</p>
+                  <p className="text-2xl font-bold text-gray-900 mb-2">
+                    ${total.toFixed(2)}
+                  </p>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-primary-500 h-2 rounded-full transition-all"
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Daily Summary */}
+        <section>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Days</h2>
+          {dailySummaries.length === 0 ? (
+            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+              <p className="text-gray-500">No expenses recorded yet</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {dailySummaries.map((summary) => (
+                <div
+                  key={summary.date}
+                  className="bg-white rounded-lg shadow-sm p-4 flex items-center justify-between hover:shadow-md transition"
+                >
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {format(parseISO(summary.date), 'EEEE, MMM dd, yyyy')}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {summary.count} {summary.count === 1 ? 'expense' : 'expenses'}
+                    </p>
+                  </div>
+                  <p className="text-xl font-bold text-gray-900">
+                    ${summary.total.toFixed(2)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
+
+      {/* Floating Add Button */}
+      <Link
+        href="/add"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-primary-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-primary-700 transition hover:scale-110"
+        aria-label="Add expense"
+      >
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 4v16m8-8H4"
+          />
+        </svg>
+      </Link>
+    </div>
+  );
+}
+
