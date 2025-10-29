@@ -44,6 +44,25 @@ export function deleteExpense(id: string): void {
 }
 
 /**
+ * Update an existing expense
+ */
+export function updateExpense(id: string, updatedExpense: Partial<Expense>): void {
+  const expenses = getExpenses();
+  const updated = expenses.map(exp => 
+    exp.id === id ? { ...exp, ...updatedExpense } : exp
+  );
+  saveExpenses(updated);
+}
+
+/**
+ * Get a single expense by ID
+ */
+export function getExpenseById(id: string): Expense | null {
+  const expenses = getExpenses();
+  return expenses.find(exp => exp.id === id) || null;
+}
+
+/**
  * Convert file to base64 data URL
  */
 export function fileToDataURL(file: File): Promise<string> {
