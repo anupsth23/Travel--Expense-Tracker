@@ -31,7 +31,7 @@ export function parseReceiptText(text: string): {
   const numbers: number[] = [];
   
   for (const line of lines) {
-    const matches = line.matchAll(currencyPattern);
+    const matches = Array.from(line.matchAll(currencyPattern));
     for (const match of matches) {
       const numStr = match[1].replace(',', '.');
       const num = parseFloat(numStr);
@@ -112,7 +112,12 @@ export async function processReceipt(imageDataUrl: string): Promise<{
   try {
     const text = await extractReceiptText(imageDataUrl);
     const parsed = parseReceiptText(text);
-    return parsed;
+    // Ensure date is never null (shouldn't happen, but TypeScript safety)
+    return {
+      amount: parsed.amount,
+      merchant: parsed.merchant,
+      date: parsed.date || new Date().toISOString().split('T')[0],
+    };
   } catch (error) {
     console.error('Error processing receipt:', error);
     // Return default values on error
